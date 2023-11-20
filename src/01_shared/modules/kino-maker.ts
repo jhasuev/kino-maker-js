@@ -16,7 +16,7 @@ interface IAnimateItem {
 
 export default class KinoMaker {
   params: IParams
-  videoTag: HTMLVideoElement
+  videoTag: HTMLVideoElement = document.createElement('video')
   status: IStatus
   animates: IAnimateItem[]
 
