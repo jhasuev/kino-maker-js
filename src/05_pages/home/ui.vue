@@ -18,11 +18,19 @@ const kinoMaker = new KinoMaker({
     showAt: 1,
     hideAt: 9,
     block: `<div class="block-1" style="border: 10px solid; color: orange; font-size: 30px; padding: 50px;">some block</div>`,
+    params: {
+      x: 40,
+      y: 40,
+    },
   },
   {
     showAt: 5,
     hideAt: 6,
     block: `<div class="block-2" style="border: 10px solid; color: blue; font-size: 30px; padding: 50px;">fast block</div>`,
+    params: {
+      x: 70,
+      y: 70,
+    },
   },
 ])
 

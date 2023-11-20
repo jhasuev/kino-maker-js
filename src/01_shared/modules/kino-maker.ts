@@ -8,15 +8,23 @@ interface IStatus {
   percent: number
   duration: number
 }
+interface IAnimateItemParams {
+  x: number
+  y: number
+}
 interface IAnimateItem {
+  id?: number
   showAt: number
   hideAt: number
   block: any
+  params: IAnimateItemParams
 }
 
 export default class KinoMaker {
   params: IParams
+  kinoMakerContainer: HTMLDivElement = document.createElement('div')
   videoTag: HTMLVideoElement = document.createElement('video')
+  animationsTag: HTMLDivElement = document.createElement('div')
   status: IStatus
   animates: IAnimateItem[]
 
@@ -33,7 +41,7 @@ export default class KinoMaker {
   }
 
   init() {
-    const videoContainer = document.querySelector(this.params.container) as HTMLDivElement
+    this.kinoMakerContainer = document.querySelector(this.params.container) as HTMLDivElement
     this.videoTag = document.createElement('video') as HTMLVideoElement
 
     this.videoTag.addEventListener("timeupdate", () => {
@@ -41,10 +49,62 @@ export default class KinoMaker {
       this.updateContent()
     })
 
-    
     this.videoTag.setAttribute('src', this.params.url)
     this.videoTag.setAttribute('style', `width: 100%`)
-    videoContainer.appendChild(this.videoTag)
+    this.kinoMakerContainer.appendChild(this.videoTag)
+    
+    this.initAnimations()
+  }
+
+  initAnimations() {
+    this.animationsTag = document.createElement('div')
+    
+    this.animationsTag.classList.add('kino-marker')
+    this.animationsTag.innerHTML = `
+      ${ this.getAnimationsLayout() }
+      <style>
+        ${ this.getAnimationsStyles() }
+      </style>
+    `
+
+    this.kinoMakerContainer.append(this.animationsTag)
+  }
+
+  getAnimationsLayout(): string {
+    const animationsHtml = this.animates.reduce(
+      (acc: string, item: IAnimateItem) => (
+        acc + `
+          <div
+            id="kino-marker-id-${ item.id }"
+            class="kino-marker-item"
+            style="right: ${ item.params.x }%; bottom: ${ item.params.y }%; transform(-100%,-100%)"
+          >${ item.block }</div>
+        `
+      ),
+      ''
+    )
+
+    return animationsHtml
+  }
+
+  getAnimationsStyles(): string {
+    return `
+      ${ this.params.container } {
+        position: relative;
+      }
+      .kino-marker-item {
+        position: absolute;
+
+        overflow: hidden;
+        opacity: 0;
+        transition: .3s;
+      }
+
+      .kino-marker-item.show {
+        overflow: visibility;
+        opacity: 1;
+      }
+    `
   }
 
   updateStatus() {
@@ -56,8 +116,11 @@ export default class KinoMaker {
   }
 
   updateContent() {
-    const animatesForShowing = this.animates.filter((animate: IAnimateItem) => {
-      return this.status.currentTime >= animate.showAt && this.status.currentTime <= animate.hideAt
+    this.animates.forEach((item: IAnimateItem) => {
+      const isShowing = this.status.currentTime >= item.showAt && this.status.currentTime <= item.hideAt
+
+      this.animationsTag.querySelector(`#kino-marker-id-${ item.id }`)
+        ?.classList[isShowing ? 'add':'remove']('show')
     })
   }
 
