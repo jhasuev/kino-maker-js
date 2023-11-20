@@ -1,0 +1,4 @@
+generates:
+  ./src/shared/types/api-types.ts:
+    plugins:
+      - typescript
